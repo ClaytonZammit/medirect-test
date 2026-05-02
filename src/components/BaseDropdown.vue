@@ -30,16 +30,31 @@ export default {
 </script>
 
 <style lang="scss">
+@use '~@/../../assets/styles/variables' as *;
+
 .dropdown {
   display: flex;
   flex-direction: column;
   margin-bottom: 15px;
 
   label {
-    color: #616161;
+    color: $text-light-color;
     font-size: 14px;
     font-weight: bold;
     margin-bottom: 10px;
+  }
+
+  select {
+    border-color: $text-light-color;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 10px;
+    text-overflow: ellipsis;
+  }
+
+  option {
+    font-size: 12px;
   }
 }
 </style>
