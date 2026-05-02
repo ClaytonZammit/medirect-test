@@ -16,6 +16,7 @@ const BUTTON_VALUES = ['1d', '1w', '1m', '3m', '6m', '1y', 'all'];
 
 export default {
   name: 'FxChartButtons',
+  props: ['ticker'],
   emits: ['selected-value'],
   data: function () {
     return {
@@ -26,6 +27,9 @@ export default {
   watch: {
     selectedValue(value) {
       this.$emit('selected-value', value);
+    },
+    ticker() {
+      this.$emit('selected-value', this.selectedValue);
     }
   },
   mounted() {
@@ -54,7 +58,7 @@ export default {
     font-weight: bold;
     padding: 10px 15px;
     text-transform: uppercase;
-    width: 60px;
+    width: 65px;
 
     &:hover {
       background-color: $button-hover-background-color;

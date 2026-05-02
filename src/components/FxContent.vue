@@ -57,7 +57,7 @@ export default {
             return { name: `${result.ticker.substring(2)} - ${result.name}`, value: result.ticker };
           });
         })
-        .catch((error) => console.log(error.response.data.error));
+        .catch((error) => this.$toast.error(error.response.data.error));
     }
   }
 };
@@ -67,7 +67,7 @@ export default {
 .content {
   margin: 0 auto;
   max-width: 800px;
-  padding: 20px;
+  padding: 12px;
 
   .heading {
     align-items: center;

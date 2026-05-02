@@ -7,9 +7,11 @@
     </div>
     <div class="row">
       <BaseField label="Exchange" value="FX" />
-      <BaseField label="Current Price" value />
+      <BaseField label="Current Price" :value="currentPrice" />
+      <FxPriceCalculator :open="startPrice" :close="closePrice" />
     </div>
-    <FxChartButtons @selected-value="setChartParameters($event)" />
+    <FxChartButtons :ticker="selectedTickerDetails.ticker" @selected-value="setChartParameters($event)" />
+    <FxChartGenerator :data="chartData" />
   </div>
 </template>
 
@@ -18,7 +20,9 @@ import axios from 'axios';
 import { API_KEY, CURRENCY_COUNTRY_CODES } from '@/constants';
 import BaseField from './BaseField.vue';
 import FxChartButtons from './FxChartButtons.vue';
+import FxChartGenerator from './FxChartGenerator.vue';
 import FxFlag from './FxFlag.vue';
+import FxPriceCalculator from './FxPriceCalculator.vue';
 
 const FLAG_CDN = 'https://flagcdn.com/';
 
@@ -27,9 +31,16 @@ export default {
   components: {
     BaseField,
     FxChartButtons,
-    FxFlag
+    FxChartGenerator,
+    FxFlag,
+    FxPriceCalculator
   },
   props: ['selectedTickerDetails'],
+  data: function () {
+    return {
+      chartData: null
+    };
+  },
   computed: {
     baseCountryFlagUrl() {
       if (this.selectedTickerDetails) {
@@ -46,6 +57,29 @@ export default {
       }
 
       return null;
+    },
+    startPrice() {
+      let start = 0;
+
+      if (this.chartData && this.chartData.results) {
+        const lastResult = this.chartData.results[this.chartData.results.length - 1];
+        start = lastResult.o;
+      }
+
+      return start;
+    },
+    closePrice() {
+      let close = 0;
+
+      if (this.chartData && this.chartData.results) {
+        const lastResult = this.chartData.results[this.chartData.results.length - 1];
+        close = lastResult.c;
+      }
+
+      return close;
+    },
+    currentPrice() {
+      return this.closePrice.toFixed(5);
     }
   },
   methods: {
@@ -129,6 +163,7 @@ export default {
           break;
         }
         default:
+          this.$toast.error('The date range selected is not valid. Please select another option.');
           return;
       }
     },
@@ -140,18 +175,18 @@ export default {
             headers: { Authorization: `Bearer ${API_KEY}` }
           })
           .then((response) => {
-            console.log(response);
+            this.chartData = response.data;
           })
-          .catch((error) => console.log(error.response.data.error));
+          .catch((error) => this.$toast.error(error.response.data.error));
       } else {
         axios
           .get(`https://api.massive.com/v2/aggs/ticker/${ticker}/prev`, {
             headers: { Authorization: `Bearer ${API_KEY}` }
           })
           .then((response) => {
-            console.log(response);
+            this.chartData = response.data;
           })
-          .catch((error) => console.log(error.response.data.error));
+          .catch((error) => this.$toast.error(error.response.data.error));
       }
     },
     getFormattedDate(date) {
@@ -175,6 +210,8 @@ export default {
   .row {
     column-gap: 10px;
     display: flex;
+    flex-wrap: wrap;
+    row-gap: 10px;
 
     .currency-symbols {
       font-size: 20px;
