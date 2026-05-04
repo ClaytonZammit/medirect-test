@@ -5,22 +5,24 @@
 </template>
 
 <script>
+import { Chart as ChartJS, Filler, Legend, Tooltip, CategoryScale, LinearScale, LineElement, PointElement } from 'chart.js';
 import { Line as LineChartGenerator } from 'vue-chartjs';
-import { Chart as ChartJS, Tooltip, Filler, LineElement, LinearScale, CategoryScale, PointElement } from 'chart.js';
 
-ChartJS.register(Tooltip, Filler, LineElement, LinearScale, CategoryScale, PointElement);
+ChartJS.register(Filler, Legend, Tooltip, CategoryScale, LinearScale, LineElement, PointElement);
 
 export default {
   name: 'FxChartGenerator',
   components: {
     LineChartGenerator
   },
-  props: ['data'],
+  props: {
+    data: { type: Array, required: true }
+  },
   data() {
     return {
       labels: [],
       datasets: [],
-      chartOptions: { maintainAspectRatio: false, responsive: true }
+      chartOptions: null
     };
   },
   computed: {
@@ -33,10 +35,48 @@ export default {
   },
   watch: {
     data(value) {
-      if (value.results) {
-        this.labels = value.results.map((result) => {
+      if (value.length > 0) {
+        this.chartOptions = {
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  return Number(context.raw).toFixed(5);
+                },
+                title: (context) => {
+                  const date = new Date(value[context[0].dataIndex].t);
+                  return date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
+                }
+              }
+            }
+          },
+          responsive: true,
+          scales: {
+            x: {
+              ticks: {
+                font: { size: 10 }
+              }
+            },
+            y: {
+              ticks: {
+                callback: function (value) {
+                  return Number(value).toFixed(5);
+                },
+                font: { size: 10 }
+              }
+            }
+          }
+        };
+        this.labels = value.map((result) => {
           const date = new Date(result.t);
-          return date.toLocaleDateString('en-UK', {
+          return date.toLocaleDateString('en-GB', {
             day: '2-digit',
             month: '2-digit',
             year: '2-digit'
@@ -46,8 +86,9 @@ export default {
           {
             backgroundColor: 'rgba(59, 113, 202, 0.2)',
             borderColor: '#3b71ca',
-            data: value.results.map((result) => result.c),
+            data: value.map((result) => result.c),
             fill: true,
+            label: 'Close Price',
             tension: 0.2
           }
         ];
@@ -58,19 +99,23 @@ export default {
 </script>
 
 <style lang="scss">
+@use '~@/../../assets/styles/variables' as *;
+
 .chart-generator {
-  height: 280px;
+  background-color: $white-color;
+  border-radius: 10px;
+  height: 300px;
 }
 
 @media (min-width: 992px) {
   .chart-generator {
-    height: 320px;
+    height: 350px;
   }
 }
 
 @media (min-width: 1200px) {
   .chart-generator {
-    height: 380px;
+    height: 400px;
   }
 }
 </style>

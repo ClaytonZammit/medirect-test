@@ -8,7 +8,10 @@
 <script>
 export default {
   name: 'BaseField',
-  props: ['label', 'value']
+  props: {
+    label: { type: String, required: true },
+    value: { type: String, required: true }
+  }
 };
 </script>
 

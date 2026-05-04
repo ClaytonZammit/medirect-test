@@ -16,8 +16,12 @@ const BUTTON_VALUES = ['1d', '1w', '1m', '3m', '6m', '1y', 'all'];
 
 export default {
   name: 'FxChartButtons',
-  props: ['ticker'],
-  emits: ['selected-value'],
+  props: {
+    ticker: { type: String, required: true }
+  },
+  emits: {
+    'selected-value': String
+  },
   data: function () {
     return {
       BUTTON_VALUES,
@@ -45,15 +49,16 @@ export default {
   border-top: 1px solid $text-light-color;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
-  padding-top: 20px;
-  row-gap: 10px;
+  gap: 10px 15px;
+  padding: 20px 10px 0;
 
   button {
+    background-color: $white-color;
     border: 1px solid transparent;
     border-radius: 8px;
-    color: $button-color;
+    color: $text-dark-color;
     cursor: pointer;
+    flex: 1 0 auto;
     font-size: 14px;
     font-weight: bold;
     padding: 10px 15px;

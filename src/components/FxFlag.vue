@@ -7,14 +7,16 @@
 <script>
 export default {
   name: 'FxFlag',
-  props: ['srcUrl']
+  props: {
+    srcUrl: { type: String, required: true }
+  }
 };
 </script>
 
 <style lang="scss">
 .flag {
   align-items: center;
-  border-radius: 5px;
+  border-radius: 4px;
   display: flex;
   height: 20px;
   justify-content: center;

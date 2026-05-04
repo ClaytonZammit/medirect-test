@@ -1,5 +1,5 @@
 <template>
-  <div v-if="selectedTickerDetails" class="chart-container">
+  <div class="chart-container">
     <div class="row">
       <FxFlag :srcUrl="baseCountryFlagUrl" />
       <FxFlag :srcUrl="targetCountryFlagUrl" />
@@ -8,7 +8,7 @@
     <div class="row">
       <BaseField label="Exchange" value="FX" />
       <BaseField label="Current Price" :value="currentPrice" />
-      <FxPriceCalculator :open="startPrice" :close="closePrice" />
+      <FxPriceCalculator :start="startPrice" :end="endPrice" />
     </div>
     <FxChartButtons :ticker="selectedTickerDetails.ticker" @selected-value="setChartParameters($event)" />
     <FxChartGenerator :data="chartData" />
@@ -35,51 +35,61 @@ export default {
     FxFlag,
     FxPriceCalculator
   },
-  props: ['selectedTickerDetails'],
+  props: {
+    selectedTickerDetails: { type: Object, required: true }
+  },
   data: function () {
     return {
-      chartData: null
+      chartData: []
     };
   },
   computed: {
     baseCountryFlagUrl() {
-      if (this.selectedTickerDetails) {
+      if (CURRENCY_COUNTRY_CODES[this.selectedTickerDetails.base_currency_symbol]) {
         const countryCode = CURRENCY_COUNTRY_CODES[this.selectedTickerDetails.base_currency_symbol].toLowerCase();
         return `${FLAG_CDN}${countryCode}.svg`;
+      } else if (this.selectedTickerDetails.base_currency_symbol === 'XAG') {
+        return require('@/assets/svgs/silver.svg');
+      } else if (this.selectedTickerDetails.base_currency_symbol === 'XAU') {
+        return require('@/assets/svgs/gold.svg');
       }
 
       return null;
     },
     targetCountryFlagUrl() {
-      if (this.selectedTickerDetails) {
+      if (CURRENCY_COUNTRY_CODES[this.selectedTickerDetails.currency_symbol]) {
         const countryCode = CURRENCY_COUNTRY_CODES[this.selectedTickerDetails.currency_symbol].toLowerCase();
         return `${FLAG_CDN}${countryCode}.svg`;
+      } else if (this.selectedTickerDetails.currency_symbol === 'XAG') {
+        return require('@/assets/svgs/silver.svg');
+      } else if (this.selectedTickerDetails.currency_symbol === 'XAU') {
+        return require('@/assets/svgs/gold.svg');
       }
 
       return null;
     },
     startPrice() {
-      let start = 0;
+      let price = 0;
 
-      if (this.chartData && this.chartData.results) {
-        const lastResult = this.chartData.results[this.chartData.results.length - 1];
-        start = lastResult.o;
+      if (this.chartData.length > 0) {
+        const lastResult = this.chartData[0];
+        price = lastResult.c;
       }
 
-      return start;
+      return price;
     },
-    closePrice() {
-      let close = 0;
+    endPrice() {
+      let price = 0;
 
-      if (this.chartData && this.chartData.results) {
-        const lastResult = this.chartData.results[this.chartData.results.length - 1];
-        close = lastResult.c;
+      if (this.chartData.length > 0) {
+        const lastResult = this.chartData[this.chartData.length - 1];
+        price = lastResult.c;
       }
 
-      return close;
+      return price;
     },
     currentPrice() {
-      return this.closePrice.toFixed(5);
+      return this.endPrice.toFixed(5);
     }
   },
   methods: {
@@ -174,18 +184,14 @@ export default {
           .get(`https://api.massive.com/v2/aggs/ticker/${ticker}/range/${multiplier}/${timespan}/${fromStr}/${toStr}`, {
             headers: { Authorization: `Bearer ${API_KEY}` }
           })
-          .then((response) => {
-            this.chartData = response.data;
-          })
+          .then((response) => (this.chartData = response.data.results))
           .catch((error) => this.$toast.error(error.response.data.error));
       } else {
         axios
           .get(`https://api.massive.com/v2/aggs/ticker/${ticker}/prev`, {
             headers: { Authorization: `Bearer ${API_KEY}` }
           })
-          .then((response) => {
-            this.chartData = response.data;
-          })
+          .then((response) => (this.chartData = response.data.results))
           .catch((error) => this.$toast.error(error.response.data.error));
       }
     },

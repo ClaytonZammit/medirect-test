@@ -1,8 +1,10 @@
 <template>
   <div class="dropdown">
     <label :for="id">{{ label }}</label>
-    <select :id="id" v-model="selected" @change="onChange">
-      <option v-for="option of options" :key="option.value" :value="option.value">{{ option.name }}</option>
+    <select :id="id" v-model="selectedValue" @change="onChange" :disabled="disabled">
+      <option v-for="option of options" :key="option.value" :value="option.value" :disabled="option.disabled">
+        {{ option.name }}
+      </option>
     </select>
   </div>
 </template>
@@ -10,10 +12,17 @@
 <script>
 export default {
   name: 'BaseDropdown',
-  props: ['label', 'options'],
+  props: {
+    label: { type: String, required: true },
+    options: { type: Array, required: true },
+    disabled: Boolean
+  },
+  emits: {
+    'selected-value': String
+  },
   data: function () {
     return {
-      selected: this.options[0]?.value
+      selectedValue: this.options[0]?.value
     };
   },
   computed: {
@@ -23,7 +32,7 @@ export default {
   },
   methods: {
     onChange() {
-      this.$emit('selected-option', this.selected);
+      this.$emit('selected-value', this.selectedValue);
     }
   }
 };
@@ -47,10 +56,17 @@ export default {
   select {
     border-color: $text-light-color;
     border-radius: 8px;
+    color: $text-dark-color;
     cursor: pointer;
     font-size: 14px;
     padding: 10px;
     text-overflow: ellipsis;
+
+    &:disabled {
+      color: $text-dark-color;
+      cursor: not-allowed;
+      opacity: 1;
+    }
   }
 
   option {

@@ -2,7 +2,7 @@
   <div :class="{ positive: difference > 0, negative: difference < 0, equal: difference == 0 }" class="price-difference">
     <span v-if="difference > 0">&#9650;</span>
     <span v-else-if="difference < 0">&#9660;</span>
-    <span v-else>&mdash;</span>
+    <span v-else>&#8212;</span>
     <span class="values">{{ difference }} ({{ percentage }}%)</span>
   </div>
 </template>
@@ -10,18 +10,21 @@
 <script>
 export default {
   name: 'FxPriceCalculator',
-  props: ['open', 'close'],
+  props: {
+    start: { type: Number, required: true },
+    end: { type: Number, required: true }
+  },
   computed: {
     difference(props) {
-      const diff = props.close - props.open;
+      const diff = props.end - props.start;
       const isNegative = diff < 0;
       const diffStr = diff.toFixed(5);
 
       // Check for case when diff is negative but insignificant when up to 5 decimal places
-      return diffStr == 0 && isNegative ? (0).toFixed(5) : diffStr;
+      return diffStr == 0 && isNegative ? '0.00000' : diffStr;
     },
     percentage(props) {
-      const percentage = (this.difference / props.open) * 100;
+      const percentage = (this.difference / props.start) * 100;
 
       return isNaN(percentage) ? '0.00' : percentage.toFixed(2);
     }

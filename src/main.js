@@ -6,6 +6,7 @@ import 'vue-toastification/dist/index.css';
 Vue.config.productionTip = false;
 
 Vue.use(Toast, {
+  draggable: false,
   maxToasts: 3,
   position: POSITION.BOTTOM_RIGHT
 });
