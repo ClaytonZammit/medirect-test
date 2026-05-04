@@ -12,7 +12,11 @@
 </template>
 
 <script>
+import { restClient } from '@massive.com/client-js';
+import { API_BASE, API_KEY } from '@/constants';
+
 const BUTTON_VALUES = ['1d', '1w', '1m', '3m', '6m', '1y', 'all'];
+const rest = restClient(API_KEY, API_BASE);
 
 export default {
   name: 'FxChartButtons',
@@ -20,24 +24,149 @@ export default {
     ticker: { type: String, required: true }
   },
   emits: {
-    'selected-value': String
+    'chart-data': Array
   },
   data: function () {
     return {
       BUTTON_VALUES,
+      hasError: false,
+      previousValue: '1m',
       selectedValue: '1m'
     };
   },
   watch: {
-    selectedValue(value) {
-      this.$emit('selected-value', value);
+    selectedValue(value, oldValue) {
+      if (!this.hasError || value !== this.previousValue) {
+        this.previousValue = oldValue;
+        this.setChartParameters();
+      }
     },
     ticker() {
-      this.$emit('selected-value', this.selectedValue);
+      this.setChartParameters();
     }
   },
   mounted() {
-    this.$emit('selected-value', this.selectedValue);
+    this.setChartParameters();
+  },
+  methods: {
+    setChartParameters() {
+      const toDate = new Date();
+      let multiplier = '';
+      let timespan = '';
+      let from = '';
+      let to = this.getFormattedDate(toDate);
+
+      switch (this.selectedValue) {
+        case '1d': {
+          this.getChartData();
+          break;
+        }
+        case '1w': {
+          const fromDate = new Date();
+          fromDate.setDate(fromDate.getDate() - 7);
+          multiplier = 4;
+          timespan = 'hour';
+          from = this.getFormattedDate(fromDate);
+
+          const params = { multiplier, timespan, from, to };
+          this.getChartData(params);
+          break;
+        }
+        case '1m': {
+          const fromDate = new Date();
+          fromDate.setMonth(fromDate.getMonth() - 1);
+          multiplier = 1;
+          timespan = 'day';
+          from = this.getFormattedDate(fromDate);
+
+          const params = { multiplier, timespan, from, to };
+          this.getChartData(params);
+          break;
+        }
+        case '3m': {
+          const fromDate = new Date();
+          fromDate.setMonth(fromDate.getMonth() - 3);
+          multiplier = 3;
+          timespan = 'day';
+          from = this.getFormattedDate(fromDate);
+
+          const params = { multiplier, timespan, from, to };
+          this.getChartData(params);
+          break;
+        }
+        case '6m': {
+          const fromDate = new Date();
+          fromDate.setMonth(fromDate.getMonth() - 6);
+          multiplier = 6;
+          timespan = 'day';
+          from = this.getFormattedDate(fromDate);
+
+          const params = { multiplier, timespan, from, to };
+          this.getChartData(params);
+          break;
+        }
+        case '1y': {
+          const fromDate = new Date();
+          fromDate.setFullYear(fromDate.getFullYear() - 1);
+          multiplier = 15;
+          timespan = 'day';
+          from = this.getFormattedDate(fromDate);
+
+          const params = { multiplier, timespan, from, to };
+          this.getChartData(params);
+          break;
+        }
+        case 'all': {
+          const fromDate = new Date();
+          fromDate.setFullYear(fromDate.getFullYear() - 2);
+          multiplier = 1;
+          timespan = 'month';
+          from = this.getFormattedDate(fromDate);
+
+          const params = { multiplier, timespan, from, to };
+          this.getChartData(params);
+          break;
+        }
+        default:
+          this.$toast.error('The date range selected is not valid. Please select another option.');
+          return;
+      }
+    },
+    getChartData(params = null) {
+      this.hasError = false;
+
+      if (params) {
+        const { multiplier, timespan, from, to } = params;
+        rest
+          .getForexAggregates({
+            forexTicker: this.ticker,
+            multiplier,
+            timespan,
+            from,
+            to
+          })
+          .then((response) => this.$emit('chart-data', response.results))
+          .catch((error) => {
+            this.hasError = true;
+            this.selectedValue = this.previousValue;
+            this.$toast.error(error.response.data.error);
+          });
+      } else {
+        rest
+          .getPreviousForexAggregates({
+            forexTicker: this.ticker
+          })
+          .then((response) => this.$emit('chart-data', response.results))
+          .catch((error) => {
+            this.hasError = true;
+            this.selectedValue = this.previousValue;
+            this.$toast.error(error.response.data.error);
+          });
+      }
+    },
+    getFormattedDate(date) {
+      return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+    }
   }
 };
 </script>

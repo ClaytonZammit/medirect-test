@@ -1,6 +1,6 @@
 <template>
   <div class="flag">
-    <img :src="srcUrl" />
+    <img :src="srcUrl" :class="{ hide: !srcUrl }" />
   </div>
 </template>
 
@@ -8,7 +8,7 @@
 export default {
   name: 'FxFlag',
   props: {
-    srcUrl: { type: String, required: true }
+    srcUrl: { type: String }
   }
 };
 </script>
@@ -27,6 +27,10 @@ export default {
     height: 100%;
     object-fit: cover;
     width: 100%;
+
+    &.hide {
+      visibility: hidden;
+    }
   }
 }
 </style>

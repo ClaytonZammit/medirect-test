@@ -8,17 +8,18 @@
     <BaseDropdown label="Exchange" :options="exchangeOptions" :disabled="true" />
     <BaseDropdown label="Primary Symbol" :options="symbolOptions" @selected-value="selectedTicker = $event" />
 
-    <FxChart v-if="selectedTickerDetails" :selected-ticker-details="selectedTickerDetails" />
+    <FxChart v-if="selectedTickerDetails" :ticker-details="selectedTickerDetails" />
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-import { API_KEY } from '@/constants';
+import { restClient } from '@massive.com/client-js';
+import { API_BASE, API_KEY } from '@/constants';
 import BaseDropdown from './BaseDropdown.vue';
 import FxChart from './FxChart.vue';
 
 const DEFAULT_SYMBOL_OPTION = { name: 'Select Primary Symbol', value: '', disabled: true };
+const rest = restClient(API_KEY, API_BASE);
 
 export default {
   name: 'FxContent',
@@ -45,21 +46,20 @@ export default {
   },
   methods: {
     getCurrencyPairs() {
-      // API call limitation: Max limit is 1000 and since there are over 1000 FX tickers it was required to make a second call
-      // in descending order with a smaller limit to get the remaining values.
-      const request1 = axios.get('https://api.massive.com/v3/reference/tickers?market=fx', {
-        headers: { Authorization: `Bearer ${API_KEY}` },
-        params: { limit: 1000 }
+      const request1 = rest.listTickers({
+        market: 'fx',
+        limit: 1000
       });
-      const request2 = axios.get('https://api.massive.com/v3/reference/tickers?market=fx', {
-        headers: { Authorization: `Bearer ${API_KEY}` },
-        params: { limit: 300, order: 'desc' }
+      const request2 = rest.listTickers({
+        market: 'fx',
+        order: 'desc',
+        limit: 300
       });
 
       Promise.all([request1, request2])
         .then(([response1, response2]) => {
-          const results1 = response1.data.results;
-          let results2 = response2.data.results;
+          const results1 = response1.results;
+          let results2 = response2.results;
           const lastAscTicker = results1[results1.length - 1].ticker;
           const firstDuplicateIndex = results2.findIndex((result) => result.ticker === lastAscTicker);
           results2 = results2.slice(0, firstDuplicateIndex).sort((a, b) => this.compareStrings(a.ticker, b.ticker));

@@ -1,3 +1,5 @@
+export const API_BASE = 'https://api.massive.com';
+
 export const API_KEY = 'G8XpDTrOCsNbQJopzJVyBGyzJLsWYtP9';
 
 export const DEVICE_TYPE = Object.freeze({
