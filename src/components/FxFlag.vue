@@ -8,7 +8,7 @@
 export default {
   name: 'FxFlag',
   props: {
-    srcUrl: { type: String }
+    srcUrl: String
   }
 };
 </script>

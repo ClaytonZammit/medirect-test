@@ -1,6 +1,6 @@
 <template>
   <div class="chart-generator">
-    <LineChartGenerator :options="options" :data="data">Chart couldn't be loaded.</LineChartGenerator>
+    <LineChartGenerator :options="options" :data="data" ref="chart">Chart couldn't be loaded.</LineChartGenerator>
   </div>
 </template>
 
@@ -18,56 +18,46 @@ export default {
   props: {
     chartData: { type: Array, required: true }
   },
-  data() {
-    return {
-      datasets: [],
-      labels: [],
-      options: null
-    };
-  },
   computed: {
     data() {
       return {
         datasets: this.datasets,
         labels: this.labels
       };
-    }
-  },
-  watch: {
-    chartData(value) {
-      if (value.length > 0) {
-        this.datasets = this.getChartDatasets();
-        this.labels = this.getChartLabels();
-        this.options = this.getChartOptions();
+    },
+    datasets() {
+      if (this.chartData?.length > 0) {
+        return [
+          {
+            backgroundColor: 'rgba(59, 113, 202, 0.2)',
+            borderColor: '#3b71ca',
+            data: this.chartData.map((result) => result.c),
+            fill: true,
+            label: 'Close Price',
+            pointHoverRadius: 5,
+            pointRadius: 4,
+            tension: 0.2
+          }
+        ];
       }
-    }
-  },
-  methods: {
-    getChartDatasets() {
-      return [
-        {
-          backgroundColor: 'rgba(59, 113, 202, 0.2)',
-          borderColor: '#3b71ca',
-          data: this.chartData.map((result) => result.c),
-          fill: true,
-          label: 'Close Price',
-          pointHoverRadius: 5,
-          pointRadius: 4,
-          tension: 0.2
-        }
-      ];
+
+      return [];
     },
-    getChartLabels() {
-      return this.chartData.map((result) => {
-        const date = new Date(result.t);
-        return date.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: '2-digit'
+    labels() {
+      if (this.chartData?.length > 0) {
+        return this.chartData.map((result) => {
+          const date = new Date(result.t);
+          return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit'
+          });
         });
-      });
+      }
+
+      return [];
     },
-    getChartOptions() {
+    options() {
       return {
         maintainAspectRatio: false,
         plugins: {
@@ -80,14 +70,18 @@ export default {
                 return Number(context.raw).toFixed(5);
               },
               title: (context) => {
-                const date = new Date(this.chartData[context[0].dataIndex].t);
-                return date.toLocaleDateString('en-GB', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                });
+                if (this.chartData?.length > 0) {
+                  const date = new Date(this.chartData[context[0].dataIndex].t);
+                  return date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
+                }
+
+                return '';
               }
             }
           }
@@ -123,13 +117,7 @@ export default {
   height: 300px;
 }
 
-@media (min-width: 992px) {
-  .chart-generator {
-    height: 350px;
-  }
-}
-
-@media (min-width: 1200px) {
+@media (min-width: 768px) {
   .chart-generator {
     height: 400px;
   }

@@ -9,7 +9,8 @@
       :loading="options.length === 0"
       :options="options"
       :placeholder="'Select ' + label"
-      :value="selectedOption"
+      :reduce="(option) => option.value"
+      :value="selectedValue"
       class="base-dropdown" />
   </div>
 </template>
@@ -27,7 +28,7 @@ export default {
   },
   data: function () {
     return {
-      selectedOption: this.options[0]
+      selectedValue: this.options[0]?.value
     };
   },
   computed: {
@@ -36,8 +37,9 @@ export default {
     }
   },
   methods: {
-    setSelectedValue(option) {
-      this.$emit('selected-value', option.value);
+    setSelectedValue(value) {
+      this.selectedValue = value;
+      this.$emit('selected-value', value);
     }
   }
 };
@@ -67,6 +69,7 @@ export default {
     }
 
     .vs__selected-options {
+      flex-wrap: nowrap;
       font-size: var(--vs-font-size);
     }
 

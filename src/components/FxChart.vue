@@ -7,7 +7,7 @@
     </div>
     <div class="row">
       <BaseField label="Exchange" value="FX" />
-      <BaseField label="Current Price" :value="currentPrice" />
+      <BaseField label="Current Price" :value="formattedEndPrice" />
       <FxPriceCalculator :start="startPrice" :end="endPrice" />
     </div>
     <FxChartButtons :ticker="tickerDetails.ticker" @chart-response="chartResponse = $event" />
@@ -67,7 +67,7 @@ export default {
 
       return price;
     },
-    currentPrice() {
+    formattedEndPrice() {
       return this.endPrice.toFixed(5);
     }
   },

@@ -1,9 +1,9 @@
 <template>
-  <div :class="{ positive: difference > 0, negative: difference < 0, equal: difference == 0 }" class="price-difference">
+  <div :class="{ positive: difference > 0, negative: difference < 0, equal: difference === 0 }" class="price-difference">
     <span v-if="difference > 0">&#9650;</span>
     <span v-else-if="difference < 0">&#9660;</span>
     <span v-else>&#8212;</span>
-    <span class="values">{{ difference }} ({{ percentage }}%)</span>
+    <span class="values">{{ formattedDifference }} ({{ formattedPercentage }}%)</span>
   </div>
 </template>
 
@@ -15,17 +15,20 @@ export default {
     end: { type: Number, required: true }
   },
   computed: {
-    difference(props) {
-      const diff = props.end - props.start;
-      const isNegative = diff < 0;
-      const diffStr = diff.toFixed(5);
-
-      // Check for case when diff is negative but insignificant when up to 5 decimal places
-      return diffStr == 0 && isNegative ? '0.00000' : diffStr;
+    difference() {
+      return this.end - this.start;
     },
-    percentage(props) {
-      const percentage = (this.difference / props.start) * 100;
+    formattedDifference() {
+      if (Math.abs(this.difference).toFixed(5) === '0.00000') {
+        return '0.00000';
+      }
 
+      return this.difference.toFixed(5);
+    },
+    formattedPercentage() {
+      const percentage = (this.difference / this.start) * 100;
+
+      // NaN is a rare case that is returned only when loading the component for the first time while the API fails due to too many requests
       return isNaN(percentage) ? '0.00' : percentage.toFixed(2);
     }
   }
@@ -61,7 +64,7 @@ export default {
   }
 }
 
-@media (min-width: 992px) {
+@media (min-width: 768px) {
   .price-difference {
     margin-left: auto;
   }
