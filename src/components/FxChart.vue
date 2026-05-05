@@ -2,16 +2,16 @@
   <div class="chart-container">
     <div class="row">
       <FxFlag :srcUrl="baseCountryFlagUrl" />
-      <FxFlag :srcUrl="targetCountryFlagUrl" />
-      <div class="currency-symbols">{{ tickerDetails.base_currency_symbol }} - {{ tickerDetails.currency_symbol }}</div>
+      <FxFlag :srcUrl="quoteCountryFlagUrl" />
+      <div class="currency-pair">{{ currencyPair }}</div>
     </div>
     <div class="row">
       <BaseField label="Exchange" value="FX" />
       <BaseField label="Current Price" :value="currentPrice" />
       <FxPriceCalculator :start="startPrice" :end="endPrice" />
     </div>
-    <FxChartButtons :ticker="tickerDetails.ticker" @chart-data="chartData = $event" />
-    <FxChartGenerator :data="chartData" />
+    <FxChartButtons :ticker="tickerDetails.ticker" @chart-response="chartResponse = $event" />
+    <FxChartGenerator :chartData="chartData" />
   </div>
 </template>
 
@@ -39,30 +39,14 @@ export default {
   },
   data: function () {
     return {
-      chartData: []
+      chartData: [],
+      chartResponse: null,
+      currencyPair: '',
+      baseCountryFlagUrl: null,
+      quoteCountryFlagUrl: null
     };
   },
   computed: {
-    baseCountryFlagUrl() {
-      if (CURRENCY_COUNTRY_CODES[this.tickerDetails.base_currency_symbol]) {
-        const countryCode = CURRENCY_COUNTRY_CODES[this.tickerDetails.base_currency_symbol].toLowerCase();
-        return `${FLAG_CDN}${countryCode}.svg`;
-      } else if (this.tickerDetails.base_currency_symbol === 'XAG' || this.tickerDetails.base_currency_symbol === 'XAU') {
-        return require(`@/assets/svgs/${this.tickerDetails.base_currency_symbol.toLowerCase()}.svg`);
-      }
-
-      return null;
-    },
-    targetCountryFlagUrl() {
-      if (CURRENCY_COUNTRY_CODES[this.tickerDetails.currency_symbol]) {
-        const countryCode = CURRENCY_COUNTRY_CODES[this.tickerDetails.currency_symbol].toLowerCase();
-        return `${FLAG_CDN}${countryCode}.svg`;
-      } else if (this.tickerDetails.currency_symbol === 'XAG' || this.tickerDetails.currency_symbol === 'XAU') {
-        return require(`@/assets/svgs/${this.tickerDetails.currency_symbol.toLowerCase()}.svg`);
-      }
-
-      return null;
-    },
     startPrice() {
       let price = 0;
 
@@ -86,6 +70,29 @@ export default {
     currentPrice() {
       return this.endPrice.toFixed(5);
     }
+  },
+  watch: {
+    chartResponse(value) {
+      this.chartData = value.results;
+
+      if (value.ticker === this.tickerDetails.ticker) {
+        this.currencyPair = `${this.tickerDetails.base_currency_symbol} - ${this.tickerDetails.currency_symbol}`;
+
+        if (CURRENCY_COUNTRY_CODES[this.tickerDetails.base_currency_symbol]) {
+          const countryCode = CURRENCY_COUNTRY_CODES[this.tickerDetails.base_currency_symbol].toLowerCase();
+          this.baseCountryFlagUrl = `${FLAG_CDN}${countryCode}.svg`;
+        } else if (this.tickerDetails.base_currency_symbol === 'XAG' || this.tickerDetails.base_currency_symbol === 'XAU') {
+          this.baseCountryFlagUrl = require(`@/assets/svgs/${this.tickerDetails.base_currency_symbol.toLowerCase()}.svg`);
+        }
+
+        if (CURRENCY_COUNTRY_CODES[this.tickerDetails.currency_symbol]) {
+          const countryCode = CURRENCY_COUNTRY_CODES[this.tickerDetails.currency_symbol].toLowerCase();
+          this.quoteCountryFlagUrl = `${FLAG_CDN}${countryCode}.svg`;
+        } else if (this.tickerDetails.currency_symbol === 'XAG' || this.tickerDetails.currency_symbol === 'XAU') {
+          this.quoteCountryFlagUrl = require(`@/assets/svgs/${this.tickerDetails.currency_symbol.toLowerCase()}.svg`);
+        }
+      }
+    }
   }
 };
 </script>
@@ -107,7 +114,7 @@ export default {
     flex-wrap: wrap;
     row-gap: 10px;
 
-    .currency-symbols {
+    .currency-pair {
       font-size: 20px;
       font-weight: bold;
     }

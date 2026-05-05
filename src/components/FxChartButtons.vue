@@ -12,11 +12,9 @@
 </template>
 
 <script>
-import { restClient } from '@massive.com/client-js';
-import { API_BASE, API_KEY } from '@/constants';
+import { createRestClient } from '@/services/restClient';
 
 const BUTTON_VALUES = ['1d', '1w', '1m', '3m', '6m', '1y', 'all'];
-const rest = restClient(API_KEY, API_BASE);
 
 export default {
   name: 'FxChartButtons',
@@ -24,7 +22,7 @@ export default {
     ticker: { type: String, required: true }
   },
   emits: {
-    'chart-data': Array
+    'chart-response': Object
   },
   data: function () {
     return {
@@ -133,11 +131,13 @@ export default {
       }
     },
     getChartData(params = null) {
+      const restClient = createRestClient();
       this.hasError = false;
 
       if (params) {
         const { multiplier, timespan, from, to } = params;
-        rest
+
+        restClient
           .getForexAggregates({
             forexTicker: this.ticker,
             multiplier,
@@ -145,18 +145,18 @@ export default {
             from,
             to
           })
-          .then((response) => this.$emit('chart-data', response.results))
+          .then((response) => this.$emit('chart-response', response))
           .catch((error) => {
             this.hasError = true;
             this.selectedValue = this.previousValue;
             this.$toast.error(error.response.data.error);
           });
       } else {
-        rest
+        restClient
           .getPreviousForexAggregates({
             forexTicker: this.ticker
           })
-          .then((response) => this.$emit('chart-data', response.results))
+          .then((response) => this.$emit('chart-response', response))
           .catch((error) => {
             this.hasError = true;
             this.selectedValue = this.previousValue;

@@ -1,6 +1,6 @@
 <template>
   <div class="chart-generator">
-    <LineChartGenerator :options="chartOptions" :data="chartData">Chart couldn't be loaded.</LineChartGenerator>
+    <LineChartGenerator :options="options" :data="data">Chart couldn't be loaded.</LineChartGenerator>
   </div>
 </template>
 
@@ -16,83 +16,99 @@ export default {
     LineChartGenerator
   },
   props: {
-    data: { type: Array, required: true }
+    chartData: { type: Array, required: true }
   },
   data() {
     return {
-      labels: [],
       datasets: [],
-      chartOptions: null
+      labels: [],
+      options: null
     };
   },
   computed: {
-    chartData() {
+    data() {
       return {
-        labels: this.labels,
-        datasets: this.datasets
+        datasets: this.datasets,
+        labels: this.labels
       };
     }
   },
   watch: {
-    data(value) {
+    chartData(value) {
       if (value.length > 0) {
-        this.chartOptions = {
-          maintainAspectRatio: false,
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: (context) => {
-                  return Number(context.raw).toFixed(5);
-                },
-                title: (context) => {
-                  const date = new Date(value[context[0].dataIndex].t);
-                  return date.toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  });
-                }
+        this.datasets = this.getChartDatasets();
+        this.labels = this.getChartLabels();
+        this.options = this.getChartOptions();
+      }
+    }
+  },
+  methods: {
+    getChartDatasets() {
+      return [
+        {
+          backgroundColor: 'rgba(59, 113, 202, 0.2)',
+          borderColor: '#3b71ca',
+          data: this.chartData.map((result) => result.c),
+          fill: true,
+          label: 'Close Price',
+          pointHoverRadius: 5,
+          pointRadius: 4,
+          tension: 0.2
+        }
+      ];
+    },
+    getChartLabels() {
+      return this.chartData.map((result) => {
+        const date = new Date(result.t);
+        return date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit'
+        });
+      });
+    },
+    getChartOptions() {
+      return {
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            onClick: () => null
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                return Number(context.raw).toFixed(5);
+              },
+              title: (context) => {
+                const date = new Date(this.chartData[context[0].dataIndex].t);
+                return date.toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
               }
+            }
+          }
+        },
+        responsive: true,
+        scales: {
+          x: {
+            ticks: {
+              font: { size: 10 }
             }
           },
-          responsive: true,
-          scales: {
-            x: {
-              ticks: {
-                font: { size: 10 }
-              }
-            },
-            y: {
-              ticks: {
-                callback: function (value) {
-                  return Number(value).toFixed(5);
-                },
-                font: { size: 10 }
-              }
+          y: {
+            ticks: {
+              callback: function (value) {
+                return Number(value).toFixed(5);
+              },
+              font: { size: 10 }
             }
           }
-        };
-        this.labels = value.map((result) => {
-          const date = new Date(result.t);
-          return date.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: '2-digit'
-          });
-        });
-        this.datasets = [
-          {
-            backgroundColor: 'rgba(59, 113, 202, 0.2)',
-            borderColor: '#3b71ca',
-            data: value.map((result) => result.c),
-            fill: true,
-            label: 'Close Price',
-            tension: 0.2
-          }
-        ];
-      }
+        }
+      };
     }
   }
 };

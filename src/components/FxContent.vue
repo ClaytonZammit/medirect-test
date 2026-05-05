@@ -13,13 +13,9 @@
 </template>
 
 <script>
-import { restClient } from '@massive.com/client-js';
-import { API_BASE, API_KEY } from '@/constants';
+import { createRestClient } from '@/services/restClient';
 import BaseDropdown from './BaseDropdown.vue';
 import FxChart from './FxChart.vue';
-
-const DEFAULT_SYMBOL_OPTION = { name: 'Select Primary Symbol', value: '', disabled: true };
-const rest = restClient(API_KEY, API_BASE);
 
 export default {
   name: 'FxContent',
@@ -30,8 +26,8 @@ export default {
   data: function () {
     return {
       allTickers: [],
-      exchangeOptions: [{ name: 'Forex (FX)', value: 'fx' }],
-      symbolOptions: [DEFAULT_SYMBOL_OPTION],
+      exchangeOptions: [{ label: 'Forex (FX)', value: 'fx' }],
+      symbolOptions: [],
       selectedTicker: null,
       selectedTickerDetails: null
     };
@@ -46,11 +42,12 @@ export default {
   },
   methods: {
     getCurrencyPairs() {
-      const request1 = rest.listTickers({
+      const restClient = createRestClient();
+      const request1 = restClient.listTickers({
         market: 'fx',
         limit: 1000
       });
-      const request2 = rest.listTickers({
+      const request2 = restClient.listTickers({
         market: 'fx',
         order: 'desc',
         limit: 300
@@ -66,10 +63,9 @@ export default {
 
           this.allTickers = [...results1, ...results2];
           this.symbolOptions = this.allTickers.map((result) => ({
-            name: `${result.ticker.substring(2)} - ${result.name}`,
+            label: `${result.ticker.substring(2)} - ${result.name}`,
             value: result.ticker
           }));
-          this.symbolOptions.unshift(DEFAULT_SYMBOL_OPTION);
         })
         .catch((error) => this.$toast.error(error.response.data.error));
     },

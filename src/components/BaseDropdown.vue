@@ -1,11 +1,16 @@
 <template>
   <div class="dropdown">
     <label :for="id">{{ label }}</label>
-    <select :id="id" v-model="selectedValue" @change="onChange" :disabled="disabled">
-      <option v-for="option of options" :key="option.value" :value="option.value" :disabled="option.disabled">
-        {{ option.name }}
-      </option>
-    </select>
+    <v-select
+      @input="setSelectedValue($event)"
+      :clearable="false"
+      :disabled="disabled"
+      :inputId="id"
+      :loading="options.length === 0"
+      :options="options"
+      :placeholder="'Select ' + label"
+      :value="selectedOption"
+      class="base-dropdown" />
   </div>
 </template>
 
@@ -22,7 +27,7 @@ export default {
   },
   data: function () {
     return {
-      selectedValue: this.options[0]?.value
+      selectedOption: this.options[0]
     };
   },
   computed: {
@@ -31,8 +36,8 @@ export default {
     }
   },
   methods: {
-    onChange() {
-      this.$emit('selected-value', this.selectedValue);
+    setSelectedValue(option) {
+      this.$emit('selected-value', option.value);
     }
   }
 };
@@ -53,24 +58,22 @@ export default {
     margin-bottom: 10px;
   }
 
-  select {
-    border-color: $text-light-color;
-    border-radius: 8px;
-    color: $text-dark-color;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 10px;
-    text-overflow: ellipsis;
+  .base-dropdown {
+    --vs-disabled-bg: #{$white-color};
+    --vs-font-size: 14px;
 
-    &:disabled {
-      color: $text-dark-color;
-      cursor: not-allowed;
-      opacity: 1;
+    .vs__dropdown-menu {
+      font-size: var(--vs-font-size);
     }
-  }
 
-  option {
-    font-size: 12px;
+    .vs__selected-options {
+      font-size: var(--vs-font-size);
+    }
+
+    .vs__spinner {
+      height: 20px;
+      width: 20px;
+    }
   }
 }
 </style>
