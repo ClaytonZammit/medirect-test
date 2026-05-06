@@ -132,37 +132,32 @@ export default {
     },
     getChartData(params = null) {
       const restClient = createRestClient();
+      let request;
       this.hasError = false;
 
       if (params) {
         const { multiplier, timespan, from, to } = params;
 
-        restClient
-          .getForexAggregates({
-            forexTicker: this.ticker,
-            multiplier,
-            timespan,
-            from,
-            to
-          })
-          .then((response) => this.$emit('chart-response', response))
-          .catch((error) => {
-            this.hasError = true;
-            this.selectedValue = this.previousValue;
-            this.$toast.error(error.response.data.error);
-          });
+        request = restClient.getForexAggregates({
+          forexTicker: this.ticker,
+          multiplier,
+          timespan,
+          from,
+          to
+        });
       } else {
-        restClient
-          .getPreviousForexAggregates({
-            forexTicker: this.ticker
-          })
-          .then((response) => this.$emit('chart-response', response))
-          .catch((error) => {
-            this.hasError = true;
-            this.selectedValue = this.previousValue;
-            this.$toast.error(error.response.data.error);
-          });
+        request = restClient.getPreviousForexAggregates({
+          forexTicker: this.ticker
+        });
       }
+
+      request
+        .then((response) => this.$emit('chart-response', response))
+        .catch((error) => {
+          this.hasError = true;
+          this.selectedValue = this.previousValue;
+          this.$toast.error(error.response.data.error);
+        });
     },
     getFormattedDate(date) {
       return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');

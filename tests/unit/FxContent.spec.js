@@ -2,11 +2,21 @@ jest.mock('@/services/restClient', () => ({
   createRestClient: jest.fn()
 }));
 
+import flushPromises from 'flush-promises';
 import { shallowMount } from '@vue/test-utils';
 import { createRestClient } from '@/services/restClient';
 import FxContent from '@/components/FxContent.vue';
 
 describe('FxContent.vue', () => {
+  const toastErrorMock = jest.fn();
+  const wrapperFactory = () =>
+    shallowMount(FxContent, {
+      mocks: {
+        $toast: {
+          error: toastErrorMock
+        }
+      }
+    });
   let listTickersMock;
 
   beforeEach(() => {
@@ -21,25 +31,21 @@ describe('FxContent.vue', () => {
     jest.clearAllMocks();
   });
 
-  it('should call API on mount and update symbolOptions on success', async () => {
+  it('should call API twice on mount and update symbolOptions on success', async () => {
     listTickersMock
-      .mockReturnValueOnce(
-        Promise.resolve({
-          results: [{ name: 'Euro - United States dollar', ticker: 'C:EURUSD' }]
-        })
-      )
-      .mockReturnValueOnce(
-        Promise.resolve({
-          results: [
-            { name: 'United States dollar - Euro', ticker: 'C:USDEUR' },
-            { name: 'Euro - United States dollar', ticker: 'C:EURUSD' }
-          ]
-        })
-      );
+      .mockResolvedValueOnce({
+        results: [{ name: 'Euro - United States dollar', ticker: 'C:EURUSD' }]
+      })
+      .mockResolvedValueOnce({
+        results: [
+          { name: 'United States dollar - Euro', ticker: 'C:USDEUR' },
+          { name: 'Euro - United States dollar', ticker: 'C:EURUSD' }
+        ]
+      });
 
-    const wrapper = shallowMount(FxContent);
+    const wrapper = wrapperFactory();
 
-    await wrapper.vm.$nextTick();
+    await flushPromises();
 
     expect(listTickersMock).toHaveBeenCalledTimes(2);
     expect(wrapper.vm.symbolOptions.length).toBe(2);
@@ -47,41 +53,35 @@ describe('FxContent.vue', () => {
   });
 
   it('should call API on mount and show a toast error on fail', async () => {
-    listTickersMock.mockReturnValue(
-      Promise.reject({
-        response: { data: { error: 'API listTickers failed' } }
-      })
-    );
-
-    const toastError = jest.fn();
-    shallowMount(FxContent, {
-      mocks: {
-        $toast: {
-          error: toastError
-        }
-      }
+    listTickersMock.mockRejectedValue({
+      response: { data: { error: 'Too Many Requests' } }
     });
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    wrapperFactory();
 
-    expect(toastError).toHaveBeenCalledWith('API listTickers failed');
+    await flushPromises();
+
+    expect(toastErrorMock).toHaveBeenCalledWith('Too Many Requests');
   });
 
   it('should update selectedTickerDetails when ticker changes', async () => {
-    listTickersMock.mockReturnValue(
-      Promise.resolve({
+    listTickersMock
+      .mockResolvedValueOnce({
         results: [{ name: 'Euro - United States dollar', ticker: 'C:EURUSD' }]
       })
-    );
+      .mockResolvedValueOnce({
+        results: [
+          { name: 'United States dollar - Euro', ticker: 'C:USDEUR' },
+          { name: 'Euro - United States dollar', ticker: 'C:EURUSD' }
+        ]
+      });
 
-    const wrapper = shallowMount(FxContent);
+    const wrapper = wrapperFactory();
     wrapper.setData({
       allTickers: [
         { name: 'Euro - United States dollar', ticker: 'C:EURUSD' },
         { name: 'United States dollar - Euro', ticker: 'C:USDEUR' }
-      ]
-    });
-    wrapper.setData({
+      ],
       selectedTicker: 'C:EURUSD'
     });
 

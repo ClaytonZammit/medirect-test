@@ -8,13 +8,16 @@ describe('BaseDropdown.vue', () => {
   ];
 
   const wrapper = shallowMount(BaseDropdown, {
+    stubs: {
+      'v-select': true
+    },
     propsData: {
       label: 'Primary Symbol',
       options
     }
   });
 
-  it('should render props.label', () => {
+  it('should render label', () => {
     expect(wrapper.find('label').text()).toBe('Primary Symbol');
   });
 

@@ -2,29 +2,27 @@ import { shallowMount } from '@vue/test-utils';
 import FxPriceCalculator from '@/components/FxPriceCalculator.vue';
 
 describe('FxPriceCalculator.vue', () => {
-  describe('difference', () => {
-    it('should calculate the value of difference based on props.start and props.end', () => {
-      const wrapper = shallowMount(FxPriceCalculator, {
-        propsData: {
-          start: 50,
-          end: 65
-        }
-      });
-
-      expect(wrapper.vm.difference).toBe(15);
+  it('should calculate the value of difference based on start and end', () => {
+    const wrapper = shallowMount(FxPriceCalculator, {
+      propsData: {
+        start: 50.123456789,
+        end: 65.987654321
+      }
     });
+
+    expect(wrapper.vm.difference).toBeCloseTo(15.864197532, 9);
   });
 
   describe('formattedDifference', () => {
     it('should format the value of difference to 5 decimal places', () => {
       const wrapper = shallowMount(FxPriceCalculator, {
         propsData: {
-          start: 50,
-          end: 65
+          start: 50.123456789,
+          end: 65.987654321
         }
       });
 
-      expect(wrapper.vm.formattedDifference).toBe('15.00000');
+      expect(wrapper.vm.formattedDifference).toBe('15.86420');
     });
 
     it('should return 0.00000 when the value of difference is negative and not visible up to 5 decimal points', () => {
@@ -39,16 +37,14 @@ describe('FxPriceCalculator.vue', () => {
     });
   });
 
-  describe('formattedPercentage', () => {
-    it('should calculate the value of percentage based on difference and props.start', () => {
-      const wrapper = shallowMount(FxPriceCalculator, {
-        propsData: {
-          start: 50,
-          end: 65
-        }
-      });
-
-      expect(wrapper.vm.formattedPercentage).toBe('30.00');
+  it('should calculate the value of formattedPercentage based on difference and start', () => {
+    const wrapper = shallowMount(FxPriceCalculator, {
+      propsData: {
+        start: 50.123456789,
+        end: 65.987654321
+      }
     });
+
+    expect(wrapper.vm.formattedPercentage).toBe('31.65');
   });
 });

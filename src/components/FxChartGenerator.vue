@@ -66,9 +66,7 @@ export default {
           },
           tooltip: {
             callbacks: {
-              label: (context) => {
-                return Number(context.raw).toFixed(5);
-              },
+              label: (context) => Number(context.raw).toFixed(5),
               title: (context) => {
                 if (this.chartData?.length > 0) {
                   const date = new Date(this.chartData[context[0].dataIndex].t);
@@ -95,9 +93,7 @@ export default {
           },
           y: {
             ticks: {
-              callback: function (value) {
-                return Number(value).toFixed(5);
-              },
+              callback: (value) => (isNaN(Number(value)) ? '0.00000' : Number(value).toFixed(5)),
               font: { size: 10 }
             }
           }

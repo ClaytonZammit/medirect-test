@@ -9,11 +9,11 @@ describe('BaseField.vue', () => {
     }
   });
 
-  it('should render props.label', () => {
+  it('should render label', () => {
     expect(wrapper.find('.label').text()).toBe('Exchange');
   });
 
-  it('should render props.value', () => {
+  it('should render value', () => {
     expect(wrapper.find('.value').text()).toBe('FX');
   });
 });
