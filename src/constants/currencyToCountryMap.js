@@ -1,14 +1,4 @@
-export const API_BASE = 'https://api.massive.com';
-
-export const API_KEY = 'G8XpDTrOCsNbQJopzJVyBGyzJLsWYtP9';
-
-export const DEVICE_TYPE = Object.freeze({
-  MOBILE: 0,
-  TABLET: 1,
-  DESKTOP: 2
-});
-
-export const CURRENCY_COUNTRY_CODES = Object.freeze({
+export const CURRENCY_TO_COUNTRY_MAP = Object.freeze({
   AED: 'AE',
   AFN: 'AF',
   ALL: 'AL',

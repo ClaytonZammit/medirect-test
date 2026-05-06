@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { CURRENCY_COUNTRY_CODES } from '@/constants';
+import { CURRENCY_TO_COUNTRY_MAP } from '@/constants/currencyToCountryMap';
 import BaseField from './BaseField.vue';
 import FxChartButtons from './FxChartButtons.vue';
 import FxChartGenerator from './FxChartGenerator.vue';
@@ -48,24 +48,20 @@ export default {
   },
   computed: {
     startPrice() {
-      let price = 0;
-
       if (this.chartData.length > 0) {
         const lastResult = this.chartData[0];
-        price = lastResult.c;
+        return lastResult.c;
       }
 
-      return price;
+      return 0;
     },
     endPrice() {
-      let price = 0;
-
       if (this.chartData.length > 0) {
         const lastResult = this.chartData[this.chartData.length - 1];
-        price = lastResult.c;
+        return lastResult.c;
       }
 
-      return price;
+      return 0;
     },
     formattedEndPrice() {
       return this.endPrice.toFixed(5);
@@ -78,15 +74,15 @@ export default {
       if (value.ticker === this.tickerDetails.ticker) {
         this.currencyPair = `${this.tickerDetails.base_currency_symbol} - ${this.tickerDetails.currency_symbol}`;
 
-        if (CURRENCY_COUNTRY_CODES[this.tickerDetails.base_currency_symbol]) {
-          const countryCode = CURRENCY_COUNTRY_CODES[this.tickerDetails.base_currency_symbol].toLowerCase();
+        if (CURRENCY_TO_COUNTRY_MAP[this.tickerDetails.base_currency_symbol]) {
+          const countryCode = CURRENCY_TO_COUNTRY_MAP[this.tickerDetails.base_currency_symbol].toLowerCase();
           this.baseCountryFlagUrl = `${FLAG_CDN}${countryCode}.svg`;
         } else if (this.tickerDetails.base_currency_symbol === 'XAG' || this.tickerDetails.base_currency_symbol === 'XAU') {
           this.baseCountryFlagUrl = require(`@/assets/svgs/${this.tickerDetails.base_currency_symbol.toLowerCase()}.svg`);
         }
 
-        if (CURRENCY_COUNTRY_CODES[this.tickerDetails.currency_symbol]) {
-          const countryCode = CURRENCY_COUNTRY_CODES[this.tickerDetails.currency_symbol].toLowerCase();
+        if (CURRENCY_TO_COUNTRY_MAP[this.tickerDetails.currency_symbol]) {
+          const countryCode = CURRENCY_TO_COUNTRY_MAP[this.tickerDetails.currency_symbol].toLowerCase();
           this.quoteCountryFlagUrl = `${FLAG_CDN}${countryCode}.svg`;
         } else if (this.tickerDetails.currency_symbol === 'XAG' || this.tickerDetails.currency_symbol === 'XAU') {
           this.quoteCountryFlagUrl = require(`@/assets/svgs/${this.tickerDetails.currency_symbol.toLowerCase()}.svg`);

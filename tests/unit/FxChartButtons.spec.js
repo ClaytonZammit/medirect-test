@@ -125,16 +125,16 @@ describe('FxChartButtons.vue', () => {
   });
 
   describe('setChartParameters', () => {
-    beforeEach(() => {
+    beforeAll(() => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2026-05-06T00:00:00Z'));
     });
 
-    afterEach(() => {
+    afterAll(() => {
       jest.useRealTimers();
     });
 
-    it('should call getChartData without passing params when selectedValue is 1d', () => {
+    it('should call getChartData with no params when selectedValue is 1d', () => {
       const getChartDataSpy = jest.spyOn(FxChartButtons.methods, 'getChartData');
       getForexAggregatesMock.mockResolvedValue();
       getPreviousForexAggregatesMock.mockResolvedValue();

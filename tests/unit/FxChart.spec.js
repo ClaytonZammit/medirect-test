@@ -115,7 +115,7 @@ describe('FxChart.vue', () => {
     });
 
     describe('baseCountryFlagUrl', () => {
-      it('should set baseCountryFlagUrl when chartResponse.ticker is equal to tickerDetails.ticker and tickerDetails.base_currency_symbol is in CURRENCY_COUNTRY_CODES', async () => {
+      it('should set baseCountryFlagUrl when chartResponse.ticker is equal to tickerDetails.ticker and tickerDetails.base_currency_symbol is in CURRENCY_TO_COUNTRY_MAP', async () => {
         const wrapper = wrapperFactory();
         wrapper.setData({
           chartResponse: {
@@ -167,7 +167,7 @@ describe('FxChart.vue', () => {
     });
 
     describe('quoteCountryFlagUrl', () => {
-      it('should set quoteCountryFlagUrl when chartResponse.ticker is equal to tickerDetails.ticker and tickerDetails.quoteCountryFlagUrl is in CURRENCY_COUNTRY_CODES', async () => {
+      it('should set quoteCountryFlagUrl when chartResponse.ticker is equal to tickerDetails.ticker and tickerDetails.quoteCountryFlagUrl is in CURRENCY_TO_COUNTRY_MAP', async () => {
         const wrapper = wrapperFactory();
         wrapper.setData({
           chartResponse: {
