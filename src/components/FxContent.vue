@@ -6,7 +6,7 @@
     </div>
 
     <BaseDropdown label="Exchange" :options="exchangeOptions" :disabled="true" />
-    <BaseDropdown label="Primary Symbol" :options="symbolOptions" @selected-value="selectedTicker = $event" />
+    <BaseDropdown label="Primary Symbol" :options="symbolOptions" :disabled="hasError" @selected-value="selectedTicker = $event" />
 
     <FxChart v-if="selectedTickerDetails" :ticker-details="selectedTickerDetails" />
   </div>
@@ -27,6 +27,7 @@ export default {
     return {
       allTickers: [],
       exchangeOptions: [{ label: 'Forex (FX)', value: 'fx' }],
+      hasError: false,
       symbolOptions: [],
       selectedTicker: null,
       selectedTickerDetails: null
@@ -41,7 +42,7 @@ export default {
     this.getCurrencyPairs();
   },
   methods: {
-    getCurrencyPairs() {
+    async getCurrencyPairs() {
       const restClient = createRestClient();
       const request1 = restClient.listTickers({
         market: 'fx',
@@ -53,21 +54,23 @@ export default {
         limit: 300
       });
 
-      Promise.all([request1, request2])
-        .then(([response1, response2]) => {
-          const results1 = response1.results;
-          let results2 = response2.results;
-          const lastAscTicker = results1[results1.length - 1].ticker;
-          const firstDuplicateIndex = results2.findIndex((result) => result.ticker === lastAscTicker);
-          results2 = results2.slice(0, firstDuplicateIndex).sort((a, b) => this.compareStrings(a.ticker, b.ticker));
+      try {
+        const [response1, response2] = await Promise.all([request1, request2]);
+        const results1 = response1.results;
+        let results2 = response2.results;
+        const lastAscTicker = results1[results1.length - 1].ticker;
+        const firstDuplicateIndex = results2.findIndex((result) => result.ticker === lastAscTicker);
+        results2 = results2.slice(0, firstDuplicateIndex).sort((a, b) => this.compareStrings(a.ticker, b.ticker));
 
-          this.allTickers = [...results1, ...results2];
-          this.symbolOptions = this.allTickers.map((result) => ({
-            label: `${result.ticker.substring(2)} - ${result.name}`,
-            value: result.ticker
-          }));
-        })
-        .catch((error) => this.$toast.error(error.response.data.error));
+        this.allTickers = [...results1, ...results2];
+        this.symbolOptions = this.allTickers.map((result) => ({
+          label: `${result.ticker.substring(2)} - ${result.name}`,
+          value: result.ticker
+        }));
+      } catch (error) {
+        this.hasError = true;
+        this.$toast.error(error.response.data.error);
+      }
     },
     compareStrings(stringA, stringB) {
       {

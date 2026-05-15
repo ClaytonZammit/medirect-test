@@ -10,6 +10,7 @@ Vue.config.productionTip = false;
 Vue.component('v-select', vSelect);
 
 Vue.use(Toast, {
+  closeButton: false,
   draggable: false,
   maxToasts: 3,
   position: POSITION.BOTTOM_RIGHT

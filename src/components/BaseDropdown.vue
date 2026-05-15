@@ -2,15 +2,15 @@
   <div class="dropdown">
     <label :for="id">{{ label }}</label>
     <v-select
-      @input="setSelectedValue($event)"
       :clearable="false"
       :disabled="disabled"
       :inputId="id"
-      :loading="options.length === 0"
+      :loading="options.length === 0 && !disabled"
       :options="options"
       :placeholder="'Select ' + label"
       :reduce="(option) => option.value"
       :value="selectedValue"
+      @input="setSelectedValue($event)"
       class="base-dropdown" />
   </div>
 </template>
@@ -21,7 +21,7 @@ export default {
   props: {
     label: { type: String, required: true },
     options: { type: Array, required: true },
-    disabled: Boolean
+    disabled: { type: Boolean, default: false }
   },
   emits: {
     'selected-value': String
@@ -61,7 +61,6 @@ export default {
   }
 
   .base-dropdown {
-    --vs-disabled-bg: #{$white-color};
     --vs-font-size: 14px;
 
     .vs__dropdown-menu {

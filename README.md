@@ -2,6 +2,12 @@
 
 ## Documentation
 
+Finish setting up the project by creating a `.env.local` file in the project root with the following line, replacing `{MASSIVE_API_KEY}` with your own API key:
+
+```
+VUE_APP_API_KEY={MASSIVE_API_KEY}
+```
+
 Run `npm run serve` for a dev server. Navigate to `http://localhost:8080/`.
 
 On initial load, the app will display two dropdowns. The _Exchange_ dropdown is disabled as the app only supports the selected option. Selecting an option from the _Primary Symbol_ dropdown will load data related to the selected pair, including the country flags and the currency codes, along with a history of the close price for the past month charted on a line graph. There is also the option to select a different date range from a list of available buttons which will in turn update the data displayed to the user accordingly.

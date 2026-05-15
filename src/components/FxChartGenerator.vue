@@ -1,6 +1,6 @@
 <template>
   <div class="chart-generator">
-    <LineChartGenerator :options="options" :data="data" ref="chart">Chart couldn't be loaded.</LineChartGenerator>
+    <LineChartGenerator :options="options" :data="data">Chart couldn't be loaded.</LineChartGenerator>
   </div>
 </template>
 
@@ -26,7 +26,7 @@ export default {
       };
     },
     datasets() {
-      if (this.chartData?.length > 0) {
+      if (this.chartData.length > 0) {
         return [
           {
             backgroundColor: 'rgba(59, 113, 202, 0.2)',
@@ -44,7 +44,7 @@ export default {
       return [];
     },
     labels() {
-      if (this.chartData?.length > 0) {
+      if (this.chartData.length > 0) {
         return this.chartData.map((result) => {
           const date = new Date(result.t);
           return date.toLocaleDateString('en-GB', {
@@ -68,7 +68,7 @@ export default {
             callbacks: {
               label: (context) => Number(context.raw).toFixed(5),
               title: (context) => {
-                if (this.chartData?.length > 0) {
+                if (this.chartData.length > 0) {
                   const date = new Date(this.chartData[context[0].dataIndex].t);
                   return date.toLocaleDateString('en-GB', {
                     day: '2-digit',

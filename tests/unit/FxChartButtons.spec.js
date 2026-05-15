@@ -318,7 +318,7 @@ describe('FxChartButtons.vue', () => {
   });
 
   describe('getChartData', () => {
-    it('should getForexAggregates if params is not null and emit chart-response on success', async () => {
+    it('should call getForexAggregates if params is not null and emit chart-response on success', async () => {
       getForexAggregatesMock.mockResolvedValueOnce().mockResolvedValue({
         results: [{ c: 25.123456789, t: 1777334400000 }],
         ticker: 'C:EURUSD'
@@ -344,7 +344,7 @@ describe('FxChartButtons.vue', () => {
       });
     });
 
-    it('should getForexAggregates if params is not null and show a toast error on fail', async () => {
+    it('should call getForexAggregates if params is not null and show a toast error on fail', async () => {
       getForexAggregatesMock.mockResolvedValueOnce().mockRejectedValueOnce({
         response: { data: { error: 'Too Many Requests' } }
       });
@@ -368,7 +368,7 @@ describe('FxChartButtons.vue', () => {
       expect(toastErrorMock).toHaveBeenCalledWith('Too Many Requests');
     });
 
-    it('should getPreviousForexAggregates if params is null and emit chart-response on success', async () => {
+    it('should call getPreviousForexAggregates if params is null and emit chart-response on success', async () => {
       getForexAggregatesMock.mockResolvedValue();
       getPreviousForexAggregatesMock.mockResolvedValue({
         results: [{ c: 25.123456789, t: 1777334400000 }],
@@ -376,8 +376,6 @@ describe('FxChartButtons.vue', () => {
       });
 
       const wrapper = wrapperFactory();
-
-      getPreviousForexAggregatesMock.mockClear();
 
       wrapper.vm.getChartData();
 
@@ -390,15 +388,13 @@ describe('FxChartButtons.vue', () => {
       });
     });
 
-    it('should getPreviousForexAggregates if params is null and show a toast error on fail', async () => {
+    it('should call getPreviousForexAggregates if params is null and show a toast error on fail', async () => {
       getForexAggregatesMock.mockResolvedValue();
       getPreviousForexAggregatesMock.mockRejectedValue({
         response: { data: { error: 'Too Many Requests' } }
       });
 
       const wrapper = wrapperFactory();
-
-      getPreviousForexAggregatesMock.mockClear();
 
       wrapper.vm.getChartData();
 
@@ -409,5 +405,12 @@ describe('FxChartButtons.vue', () => {
       expect(wrapper.vm.previousValue).toBe('1m');
       expect(toastErrorMock).toHaveBeenCalledWith('Too Many Requests');
     });
+  });
+
+  it('should return a date string formatted as yyyy-MM-dd when getFormattedDate is called', () => {
+    const result = FxChartButtons.methods.getFormattedDate;
+
+    expect(result(new Date('2025-09-20T12:00:00'))).toBe('2025-09-20');
+    expect(result(new Date(2026, 4, 13))).toBe('2026-05-13');
   });
 });
